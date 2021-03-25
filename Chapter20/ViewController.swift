@@ -22,11 +22,31 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
+        // ワールド座標軸を表示する
+        sceneView.debugOptions = [.showWorldOrigin]
+        
         // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
+        let scene = SCNScene()
+        sceneView.scene = scene
+        
+        // ジオメトリ
+        let earth = SCNSphere(radius: 0.2)
+        
+        // テクスチャ
+        earth.firstMaterial?.diffuse.contents = UIImage(named: "earth_1024")
+        
+        // ノード
+        let earthNode = SCNNode(geometry: earth)
+        
+        // アニメーション
+        let action = SCNAction.rotateBy(x: 0, y: .pi * 2, z: 0, duration: 10)
+        earthNode.runAction(SCNAction.repeatForever(action))
+        
+        // 位置決め
+        earthNode.position = SCNVector3(0.2, 0.3, -0.2)
         
         // Set the scene to the view
-        sceneView.scene = scene
+        sceneView.scene.rootNode.addChildNode(earthNode)
     }
     
     override func viewWillAppear(_ animated: Bool) {
