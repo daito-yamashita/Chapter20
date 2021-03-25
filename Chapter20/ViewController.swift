@@ -22,31 +22,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
-        // ワールド座標軸を表示する
-        sceneView.debugOptions = [.showWorldOrigin]
+        // シーンを作る
+        sceneView.scene = SCNScene()
         
-        // Create a new scene
-        let scene = SCNScene()
-        sceneView.scene = scene
+        // デバッグ表示（ワイヤーフレーム）
+        sceneView.debugOptions = .showWireframe
         
-        // ジオメトリ
-        let earth = SCNSphere(radius: 0.2)
-        
-        // テクスチャ
-        earth.firstMaterial?.diffuse.contents = UIImage(named: "earth_1024")
-        
-        // ノード
-        let earthNode = SCNNode(geometry: earth)
-        
-        // アニメーション
-        let action = SCNAction.rotateBy(x: 0, y: .pi * 2, z: 0, duration: 10)
-        earthNode.runAction(SCNAction.repeatForever(action))
-        
-        // 位置決め
-        earthNode.position = SCNVector3(0.2, 0.3, -0.2)
-        
-        // Set the scene to the view
-        sceneView.scene.rootNode.addChildNode(earthNode)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -54,6 +35,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
+        
+        // 平面の検出を有効にする
+        configuration.planeDetection = [.horizontal, .vertical]
 
         // Run the view's session
         sceneView.session.run(configuration)
@@ -68,6 +52,34 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     // MARK: - ARSCNViewDelegate
     
+    // ノードが追加された
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        // 平面アンカではないときは中断する
+        guard let planeAnchor = anchor as? ARPlaneAnchor else {
+            return
+        }
+        
+        // アンカが示す位置に平面ノードを追加する
+        node.addChildNode(PlaneNode(anchor: planeAnchor))
+    }
+    
+    // ノードが更新された
+    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
+        
+        // 平面アンカでないときは中断する
+        guard let planeAnchor = anchor as? ARPlaneAnchor else {
+            return
+        }
+        
+        // PlaneNodeでない時は中断する
+        guard let planeNode = node.childNodes.first as? PlaneNode else {
+            return
+        }
+        
+        // ノードの位置とサイズを更新する
+        planeNode.update(anchor: planeAnchor)
+        
+    }
 /*
     // Override to create and configure nodes for anchors added to the view's session.
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
