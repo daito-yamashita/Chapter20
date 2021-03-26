@@ -18,30 +18,62 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // タップした2D座標
         let tapLoc = sender.location(in: sceneView)
         
+        // 2D座標のヒットテスト
+        let hitTestOptions = [SCNHitTestOption: Any]()
+        
         // 検知平面とタップ座標のヒットテスト
-        let results = sceneView.hitTest(tapLoc, types: .existingPlaneUsingExtent)
-        
-        // 検知平面をタップしていたら最前面のヒットデータをresuluに入れる
-        // 配列の最初の値が最前面にある平面になる
-        guard let result = results.first else {
-            return
+        let results = sceneView.hitTest(tapLoc, options: hitTestOptions)
+        if let result = results.first {
+            // BoxNodeをタップしたなら飛ばす
+            guard let node = result.node as? BoxNode else {
+                return
+            }
+            // タップしたBoxNodeを飛ばす
+            
+            let frame = sceneView.session.currentFrame!
+            let tf = frame.camera.transform
+            
+            // カメラの位置
+            let cameraPos = SCNVector3(tf.columns.3.x, tf.columns.3.y, tf.columns.3.z)
+            
+            // カメラとノードの距離 len
+            let x = node.position.x - cameraPos.x
+            let y = node.position.y - cameraPos.y
+            let z = node.position.z - cameraPos.z
+            // ベクトルの長さ
+            let len = sqrtf(x*x + y*y + z*z)
+            // カメラからノード方向への単位ベクトル
+            let unitVec = SCNVector3(x/len, y/len, z/len)
+            
+            // 飛ばす力
+            let force: Float = 2.0
+            // 力のベクトル
+            let forceVec = SCNVector3(force*unitVec.x, force*unitVec.y, force*unitVec.z)
+            // ノードを弾くように力を加える
+            node.physicsBody?.applyForce(forceVec, asImpulse: true)
+            
+            // BoxNodeが重力の影響を受けるようにする
+            node.physicsBody?.isAffectedByGravity = true
+            
+        } else {
+            // 何もない時はタップした位置にBoxNodeを追加する
+            
+            // カメラの正面の位置にノードを追加する
+            if let frame = sceneView.session.currentFrame {
+                // トランスフォームを作る
+                var transform = matrix_identity_float4x4
+                transform.columns.3.z = -0.2
+                
+                // カメラ正面の位置を作る
+                let tf = simd_mul(frame.camera.transform, transform)
+                let pos = SCNVector3(tf.columns.3.x, tf.columns.3.y, tf.columns.3.z)
+                
+                // ノードを作る（物理ボディ）
+                let boxNode = BoxNode()
+                boxNode.position = pos
+                sceneView.scene.rootNode.addChildNode(boxNode)
+            }
         }
-        
-        // ヒットテストの結果からAR空間のワールド座標を取り出す
-        let pos = result.worldTransform.columns.3
-        
-        // 箱ノードを作る
-        let boxNode = BoxNode()
-        
-        // ノードの高さを求める
-        let height = boxNode.boundingBox.max.y - boxNode.boundingBox.min.y
-        let y = pos.y + Float(height / 2.0)
-        
-        // 位置決めをする
-        boxNode.position = SCNVector3(pos.x, y, pos.z)
-        
-        // シーンに箱ノードを追加する
-        sceneView.scene.rootNode.addChildNode(boxNode)
     }
     
     override func viewDidLoad() {
@@ -58,6 +90,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // デバッグ表示（ワイヤーフレーム）
         sceneView.debugOptions = .showWireframe
+        
+        // AR世界の重力を設定
+        sceneView.scene.physicsWorld.gravity = SCNVector3(0, -1.0, 0)
         
     }
     
