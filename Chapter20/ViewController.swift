@@ -13,6 +13,37 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
+    @IBAction func tapSceneView( _ sender: UITapGestureRecognizer) {
+        
+        // タップした2D座標
+        let tapLoc = sender.location(in: sceneView)
+        
+        // 検知平面とタップ座標のヒットテスト
+        let results = sceneView.hitTest(tapLoc, types: .existingPlaneUsingExtent)
+        
+        // 検知平面をタップしていたら最前面のヒットデータをresuluに入れる
+        // 配列の最初の値が最前面にある平面になる
+        guard let result = results.first else {
+            return
+        }
+        
+        // ヒットテストの結果からAR空間のワールド座標を取り出す
+        let pos = result.worldTransform.columns.3
+        
+        // 箱ノードを作る
+        let boxNode = BoxNode()
+        
+        // ノードの高さを求める
+        let height = boxNode.boundingBox.max.y - boxNode.boundingBox.min.y
+        let y = pos.y + Float(height / 2.0)
+        
+        // 位置決めをする
+        boxNode.position = SCNVector3(pos.x, y, pos.z)
+        
+        // シーンに箱ノードを追加する
+        sceneView.scene.rootNode.addChildNode(boxNode)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
