@@ -23,6 +23,13 @@ class BoxNode: SCNNode {
         
         // ノードのgeometryプロパティに設定する
         geometry = box
+        
+        // 物理ノードを設定する
+        let bodyShape = SCNPhysicsShape(geometry: geometry!, options: [:])
+        physicsBody = SCNPhysicsBody(type: .dynamic, shape: bodyShape)
+        // 重力の影響を受けない
+        physicsBody?.isAffectedByGravity = false
+        physicsBody?.friction = 2.0
+        physicsBody?.restitution = 0.2
     }
-    
 }
