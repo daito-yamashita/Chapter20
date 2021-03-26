@@ -1,0 +1,17 @@
+{
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "resources" : [
+    {
+      "filename" : "Clorets.arreferenceimage"
+    },
+    {
+      "filename" : "syoukai_Swift.arreferenceimage"
+    },
+    {
+      "filename" : "THERMOS.arreferenceimage"
+    }
+  ]
+}

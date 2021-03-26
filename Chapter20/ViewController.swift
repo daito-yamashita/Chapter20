@@ -22,11 +22,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
-        // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
-        
         // Set the scene to the view
-        sceneView.scene = scene
+        sceneView.scene = SCNScene()
+        
+        // 特徴点を表示する
+        sceneView.debugOptions = [.showFeaturePoints]
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -35,6 +35,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
 
+        // Assets.xcassetsの"AR Resource"グループ画像を参照
+        guard let referenceImage = ARReferenceImage.referenceImages(inGroupNamed: "AR Resources", bundle: nil) else {
+            return
+        }
+        
+        // 参照画像を設定する
+        configuration.detectionImages = referenceImage
+        
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -56,6 +64,27 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         return node
     }
 */
+  
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        // 画像認識したアンカを取り出す
+        guard let imageAnchor = anchor as? ARImageAnchor else {
+            return
+        }
+        let referenceImage = imageAnchor.referenceImage
+        
+        // 認識画像をハイライトする
+        let plane = SCNPlane(width: referenceImage.physicalSize.width, height: referenceImage.physicalSize.height)
+        let planeNode = SCNNode(geometry: plane)
+        planeNode.eulerAngles.x = -.pi / 2
+        planeNode.opacity = 0.25
+        node.addChildNode(planeNode)
+        
+        let name = referenceImage.name!
+        let nameNode = TextNode(str: name)
+        nameNode.eulerAngles.x = -.pi / 2
+        node.addChildNode(nameNode)
+    
+    }
     
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
