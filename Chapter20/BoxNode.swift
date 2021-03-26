@@ -23,6 +23,16 @@ class BoxNode: SCNNode {
         
         // ノードのgeometryプロパティに設定する
         geometry = box
+        
+        // 物理ボディを設定する
+        let bodyShape = SCNPhysicsShape(geometry: geometry!, options: [:])
+        physicsBody = SCNPhysicsBody(type: .dynamic, shape: bodyShape)
+        physicsBody?.friction = 1.0
+        physicsBody?.restitution = 0.2
+        
+        // 衝突する相手を決める
+        physicsBody?.categoryBitMask = Category.boxCategory
+        physicsBody?.collisionBitMask = Category.all
     }
     
 }

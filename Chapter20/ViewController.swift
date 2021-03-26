@@ -13,6 +13,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
+    var nodes: Array<SCNNode>!
+    
     @IBAction func tapSceneView( _ sender: UITapGestureRecognizer) {
         
         // タップした2D座標
@@ -27,21 +29,31 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             return
         }
         
-        // ヒットテストの結果からAR空間のワールド座標を取り出す
-        let pos = result.worldTransform.columns.3
+        // 検出した平面のアンカを取得する
+        if let anchor = result.anchor as? ARPlaneAnchor {
+            // 水平面でない場合は処理を中断する
+            if anchor.alignment == .vertical {
+                return
+            }
+        }
         
         // 箱ノードを作る
         let boxNode = BoxNode()
+        // 地球ノードを作る
+        let earthNode = EarthNode()
+        nodes = [boxNode, earthNode]
         
-        // ノードの高さを求める
-        let height = boxNode.boundingBox.max.y - boxNode.boundingBox.min.y
-        let y = pos.y + Float(height / 2.0)
+        // 追加するノードをランダムに選ぶ
+        let index = Int(arc4random()) % (nodes.count)
+        let node = nodes[index]
         
-        // 位置決めをする
-        boxNode.position = SCNVector3(pos.x, y, pos.z)
-        
+        // タップされた座標から位置決めする
+        let pos = result.worldTransform.columns.3
+        let y = pos.y + 0.2
+        node.position = SCNVector3(pos.x, y, pos.z)
+
         // シーンに箱ノードを追加する
-        sceneView.scene.rootNode.addChildNode(boxNode)
+        sceneView.scene.rootNode.addChildNode(node)
     }
     
     override func viewDidLoad() {
