@@ -56,6 +56,19 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.scene.rootNode.addChildNode(node)
     }
     
+    @IBAction func restart(_ sender: Any) {
+        // 追加したノードを全て取り除く
+        for node in sceneView.scene.rootNode.childNodes {
+            node.removeFromParentNode()
+        }
+        // 現在のconfig
+        let configuration = sceneView.session.configuration
+        
+        // リセット後にセッションを開始する
+        let runOptions: ARSession.RunOptions = [.resetTracking, .removeExistingAnchors]
+        sceneView.session.run(configuration!, options: runOptions)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         

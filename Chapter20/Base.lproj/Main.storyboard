@@ -23,6 +23,14 @@
                                     <outletCollection property="gestureRecognizers" destination="UWl-Cp-puA" appends="YES" id="5CY-V0-WMv"/>
                                 </connections>
                             </arscnView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3eX-85-Zc6">
+                                <rect key="frame" x="300" y="767" width="46" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="restart"/>
+                                <connections>
+                                    <action selector="restart:" destination="BV1-FR-VrT" eventType="touchUpInside" id="cNL-Je-xlQ"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="fQZ-KI-GVf"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -44,7 +52,7 @@
                     </connections>
                 </tapGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="-259" y="116"/>
+            <point key="canvasLocation" x="-90" y="2"/>
         </scene>
     </scenes>
     <resources>
